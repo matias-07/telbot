@@ -1,33 +1,12 @@
-from commands.codes import command_codes
-
-class Message:
-
-	def __init__(self, user_id, chat_id, content, timestamp):
-		pass
-
-	def get_content(self):
-		pass
-
-	def get_user_id(self):
-		pass
-
-	def get_chat_id(self):
-		pass
-
-	def get_timestamp(self):
-		pass
-
-	def normalize(self):
-		pass
-
-	def uppercase(self):
-		pass
-
-	def lowercase(self):
-		pass
+import requests
+import time
+import json
+from datetime import datetime
 
 
 class TelBot:
+
+	DEBUG = True
 
 	def __init__(self, token):
 		"""Telegram Bot's class constructor.
@@ -36,22 +15,88 @@ class TelBot:
 		Returns:
 		* TelBot object.
 		"""
-		pass
+		self.token = token
+		self.timestamp = datetime.now().timestamp()
+		self.commands = []
 
-	def _make_request(self, endpoint):
-		pass
-
-	def send_message(self, chat_id, content, parse_mode=None):
-		pass
-
-	def read_messages(self, chat_id):
-		pass
 
 	def set_command(self, command):
-		pass
+		self.commands.append(command)
 
-	def reset_commands(self):
-		pass
 
-	def handle_message(self, message):
-		pass
+	def make_request(self, endpoint, method, data={}):
+		"""Makes a request to the Telegram Bot API and
+		returns the JSON response.
+		Receives:
+		* endpoint: String.
+		* method: String ("GET", "POST")
+		* data: Dictionary.
+		Returns:
+		* Response.
+		"""
+		url = f"https://api.telegram.org/bot{self.token}/{endpoint}"
+		response = None
+
+		if method == "GET":
+			response = requests.get(url, params=data)
+		elif method == "POST":
+			response = requests.post(url, data=data)
+
+		time.sleep(1)
+		json_response = response.json()
+		
+		if self.DEBUG:
+			print(" " * 80)
+			print("=" * 80)
+			print(f"{datetime.now()} - {method} {endpoint} - {response.status_code}")
+			print(json.dumps(json_response, indent=4))
+			print("=" * 80)
+			print(" " * 80)
+
+		if not json_response["ok"]:
+			return None
+
+		return json_response["result"]
+
+
+	def send_message(self, **data):
+		return self.make_request("sendMessage", "POST", data)
+
+
+	def get_unread_messages(self):
+		updates = self.make_request("getUpdates", "GET")
+		if not updates:
+			return []
+
+		messages = map(lambda update: update["message"], updates)
+		messages = filter(lambda message: int(message["date"]) > self.timestamp, messages)
+
+		return list(messages)
+
+
+	def handle_message(self, text, user_name, chat_id):
+		for command in self.commands:
+			result = command(text=text, user_name=user_name)
+
+			if not result:
+				continue
+
+			if isinstance(result, list):
+				for message in result:
+					self.send_message(text=message, chat_id=chat_id)
+			else:
+				self.send_message(text=result, chat_id=chat_id)
+
+
+	def read_messages(self):
+		for message in self.get_unread_messages():
+			text = message["text"]
+			user_name = message["from"]["first_name"]
+			chat_id = message["chat"]["id"]
+			self.handle_message(text, user_name, chat_id)
+			self.timestamp = int(message["date"])
+
+
+	def run(self):
+		while True:
+			self.read_messages()
