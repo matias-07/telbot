@@ -46,6 +46,40 @@ def btc(**kwargs):
 
 	return "Sorry, I couldn't find the conversion to that currency"
 
+def xkcd(**kwargs):
+	text = kwargs.get("text").lower()
+
+	if text != "xkcd":
+		return None
+
+	try:
+		response = requests.get(f"https://xkcd.com/{random.randint(1, 2316)}/info.0.json")
+		json_response = response.json()
+		return [
+			json_response.get("title"),
+			json_response.get("img")
+		]
+	except:
+		return "Something went wrong..."
+
+def reddit(**kwargs):
+	text = kwargs.get("text").lower()
+
+	if text != "reddit":
+		return None
+
+	try:
+		response = requests.get("https://www.reddit.com/.json", headers={"User-agent": "TelBot 0.1"})
+		json_response = response.json()
+		posts = json_response["data"]["children"]
+		post = random.choice(posts)
+		return [
+			"I recommend this post",
+			post["data"]["title"],
+			f"https://www.reddit.com/{post['data']['permalink']}"
+		]
+	except Exception as e:
+		return "Oops... An error has ocurred"
 
 if __name__ == "__main__":
 	bot = TelBot(TOKEN)
@@ -53,7 +87,9 @@ if __name__ == "__main__":
 	bot.set_commands(
 		say_hi,
 		say_bye,
-		btc
+		btc,
+		xkcd,
+		reddit
 	)
 
 	bot.run()

@@ -60,6 +60,15 @@ class TelBot:
 
 
 	def send_message(self, **data):
+		content = data.get("text")
+		if len(content.split()) == 1\
+			and (content.endswith(".png")
+			or content.endswith(".jpg")
+			or content.endswith(".gif")):
+			data["text"] = None
+			data["photo"] = content
+			return self.make_request("sendPhoto", "POST", data)
+
 		return self.make_request("sendMessage", "POST", data)
 
 
