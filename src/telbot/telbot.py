@@ -20,8 +20,8 @@ class TelBot:
 		self.commands = []
 
 
-	def set_command(self, command):
-		self.commands.append(command)
+	def set_commands(self, *commands):
+		self.commands = commands
 
 
 	def make_request(self, endpoint, method, data={}):
