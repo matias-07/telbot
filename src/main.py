@@ -3,10 +3,24 @@ import random
 import requests
 from telbot import TelBot
 
+
 TOKEN = os.environ.get("TELEGRAM_API_TOKEN")
 
+
+def _error_message():
+	"""Returns a random generic error message.
+	"""
+	return random.choice([
+		"Oops... An error has ocurred",
+		"Something went wrong...",
+		"Sorry, I couldn't get that",
+	])
+
+
 def say_hi(**kwargs):
-	text = kwargs.get("text")
+	"""Returns a greeting.
+	"""
+	text = kwargs.get("text").lower()
 	user_name = kwargs.get("user_name")
 
 	if "hello" in text or "hi" in text:
@@ -15,7 +29,10 @@ def say_hi(**kwargs):
 			f"Hey {user_name}, what's up?",
 		])
 
+
 def say_bye(**kwargs):
+	"""Returns a goodbye.
+	"""
 	text = kwargs.get("text")
 	user_name = kwargs.get("user_name")
 
@@ -25,7 +42,10 @@ def say_bye(**kwargs):
 			"Take care."
 		]
 
+
 def btc(**kwargs):
+	"""Returns BTC conversion to given currency.
+	"""
 	text = kwargs.get("text").upper().split(" ")
 	
 	if len(text) != 3:
@@ -42,14 +62,15 @@ def btc(**kwargs):
 			if currency["code"] == query_currency:
 				return f"1 BTC = {currency['rate']} {query_currency}"
 	except:
-		return "Something went wrong..."
+		return _error_message()
 
-	return "Sorry, I couldn't find the conversion to that currency"
+	return "I couldn't find the conversion to that currency"
+
 
 def xkcd(**kwargs):
-	text = kwargs.get("text").lower()
-
-	if text != "xkcd":
+	"""Returns a random xkcd comic [title, image].
+	"""
+	if kwargs.get("text").lower() != "xkcd":
 		return None
 
 	try:
@@ -60,12 +81,13 @@ def xkcd(**kwargs):
 			json_response.get("img")
 		]
 	except:
-		return "Something went wrong..."
+		return _error_message()
+
 
 def reddit(**kwargs):
-	text = kwargs.get("text").lower()
-
-	if text != "reddit":
+	"""Returns a top reddit post [message, url].
+	"""
+	if kwargs.get("text").lower() != "reddit":
 		return None
 
 	try:
@@ -75,11 +97,11 @@ def reddit(**kwargs):
 		post = random.choice(posts)
 		return [
 			"I recommend this post",
-			post["data"]["title"],
 			f"https://www.reddit.com/{post['data']['permalink']}"
 		]
-	except Exception as e:
-		return "Oops... An error has ocurred"
+	except:
+		return _error_message()
+
 
 if __name__ == "__main__":
 	bot = TelBot(TOKEN)

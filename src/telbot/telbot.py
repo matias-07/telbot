@@ -1,6 +1,7 @@
 import requests
 import time
 import json
+import telbot.utils as utils
 from datetime import datetime
 
 
@@ -59,16 +60,12 @@ class TelBot:
 		return json_response["result"]
 
 
-	def send_message(self, **data):
-		content = data.get("text")
-		if len(content.split()) == 1\
-			and (content.endswith(".png")
-			or content.endswith(".jpg")
-			or content.endswith(".gif")):
-			data["text"] = None
+	def send_message(self, content, **data):
+		if utils.is_photo(content):
 			data["photo"] = content
 			return self.make_request("sendPhoto", "POST", data)
 
+		data["text"] = content
 		return self.make_request("sendMessage", "POST", data)
 
 
@@ -92,9 +89,9 @@ class TelBot:
 
 			if isinstance(result, list):
 				for message in result:
-					self.send_message(text=message, chat_id=chat_id)
+					self.send_message(message, chat_id=chat_id)
 			else:
-				self.send_message(text=result, chat_id=chat_id)
+				self.send_message(result, chat_id=chat_id)
 
 
 	def read_messages(self):
