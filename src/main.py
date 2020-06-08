@@ -2,13 +2,15 @@ import os
 import random
 import requests
 from telbot import TelBot
+from telbot import Cache
 
 
 TOKEN = os.environ.get("TELEGRAM_API_TOKEN")
+CACHE = Cache()
 
 
 def _error_message():
-	"""Returns a random generic error message.
+	"""Returns a generic error message.
 	"""
 	return random.choice([
 		"Oops... An error has ocurred",
@@ -91,8 +93,16 @@ def reddit(**kwargs):
 		return None
 
 	try:
-		response = requests.get("https://www.reddit.com/.json", headers={"User-agent": "TelBot 0.1"})
-		json_response = response.json()
+		json_response = CACHE.get("reddit")
+
+		if not json_response:
+			response = requests.get(
+				"https://www.reddit.com/.json",
+				headers={"User-agent": "TelBot 0.1"}
+			)
+			json_response = response.json()
+			CACHE.set("reddit", json_response, 60 * 60) # Cache for 1 hour
+
 		posts = json_response["data"]["children"]
 		post = random.choice(posts)
 		return [
@@ -105,7 +115,7 @@ def reddit(**kwargs):
 
 if __name__ == "__main__":
 	bot = TelBot(TOKEN)
-
+	print(">> TelBot correctly initialized!")
 	bot.set_commands(
 		say_hi,
 		say_bye,

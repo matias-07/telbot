@@ -7,7 +7,7 @@ from datetime import datetime
 
 class TelBot:
 
-	DEBUG = True
+	DEBUG = False
 
 	def __init__(self, token):
 		"""Telegram Bot's class constructor.
