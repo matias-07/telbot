@@ -113,6 +113,22 @@ def reddit(**kwargs):
 		return _error_message()
 
 
+def newton(**kwargs):
+	text = kwargs.get("text").lower().split()
+
+	if len(text) != 3 or text[0] != "newton":
+		return None
+
+	operation = text[1]
+	expression = text[2]
+
+	try:
+		response = requests.get(f"https://newton.now.sh/{operation}/{expression}")
+		json_response = response.json()
+		return f"The result is {json_response['result']}"
+	except:
+		return _error_message()
+
 if __name__ == "__main__":
 	bot = TelBot(TOKEN)
 	print(">> TelBot correctly initialized!")
@@ -121,7 +137,8 @@ if __name__ == "__main__":
 		say_bye,
 		btc,
 		xkcd,
-		reddit
+		reddit,
+		newton
 	)
 
 	bot.run()
