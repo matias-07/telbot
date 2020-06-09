@@ -65,6 +65,10 @@ class TelBot:
 			data["photo"] = content
 			return self.make_request("sendPhoto", "POST", data)
 
+		if utils.is_animation(content):
+			data["animation"] = content
+			return self.make_request("sendAnimation", "POST", data)
+
 		data["text"] = content
 		return self.make_request("sendMessage", "POST", data)
 
@@ -74,8 +78,8 @@ class TelBot:
 		if not updates:
 			return []
 
-		messages = map(lambda update: update["message"], updates)
-		messages = filter(lambda message: int(message["date"]) > self.timestamp, messages)
+		messages = map(lambda update: update.get("message", {}), updates)
+		messages = filter(lambda message: int(message.get("date", 0)) > self.timestamp, messages)
 
 		return list(messages)
 

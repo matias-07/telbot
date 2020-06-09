@@ -129,6 +129,19 @@ def newton(**kwargs):
 	except:
 		return _error_message()
 
+
+def yesno(**kwargs):
+	if "yes or no" not in kwargs.get("text").lower():
+		return None
+
+	try:
+		response = requests.get(f"https://yesno.wtf/api")
+		json_response = response.json()
+		return json_response["image"]
+	except:
+		return _error_message()
+
+
 if __name__ == "__main__":
 	bot = TelBot(TOKEN)
 	print(">> TelBot correctly initialized!")
@@ -138,7 +151,8 @@ if __name__ == "__main__":
 		btc,
 		xkcd,
 		reddit,
-		newton
+		newton,
+		yesno
 	)
 
 	bot.run()
