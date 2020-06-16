@@ -1,20 +1,33 @@
 import requests
 import time
 import json
-import telbot.utils as utils
 from datetime import datetime
 
 
 class TelBot:
+	"""TelBot's main class.
 
+	To use TelBot you will need a valid token for the Bot API:
+		https://core.telegram.org/bots/api
+
+	This class is made so you can add any
+	command you'd like and then let the bot handle
+	everything for you by calling telbot.run().
+
+	"""
+
+	API_URL = "https://api.telegram.org/bot"
 	DEBUG = False
 
+
 	def __init__(self, token):
-		"""Telegram Bot's class constructor.
-		Receives:
-		* token: A valid Telegram Bot API token.
-		Returns:
-		* TelBot object.
+		"""TelBot's class constructor.
+
+		Parameters
+		----------
+		token: String
+			A valid Telegram Bot API token.
+
 		"""
 		self.token = token
 		self.timestamp = datetime.now().timestamp()
@@ -22,20 +35,38 @@ class TelBot:
 
 
 	def set_commands(self, *commands):
+		"""Set commands for the bot.
+
+		Parameters
+		----------
+		commands: One or multiple functions
+			Commands the bot will support. Each of these functions
+			must return none (None), one (string) or multiple
+			(list of strings) responses.
+
+		"""
 		self.commands = commands
 
 
 	def make_request(self, endpoint, method, data={}):
-		"""Makes a request to the Telegram Bot API and
-		returns the JSON response.
-		Receives:
-		* endpoint: String.
-		* method: String ("GET", "POST")
-		* data: Dictionary.
-		Returns:
-		* Response.
+		"""Makes a request to the Telegram Bot API.
+
+		Parameters
+		----------
+		endpoint: String
+			Valid Telegram Bot API endpoint.
+		method: String
+			HTTP request method, GET or POST.
+		data: Dictionary
+			Request's query arguments (GET) or JSON data (POST).
+
+		Returns
+		-------
+		Dictionary
+			Response's data.
+
 		"""
-		url = f"https://api.telegram.org/bot{self.token}/{endpoint}"
+		url = f"{self.API_URL}{self.token}/{endpoint}"
 		response = None
 
 		if method == "GET":
@@ -61,11 +92,27 @@ class TelBot:
 
 
 	def send_message(self, content, **data):
-		if utils.is_photo(content):
+		"""Sends a message.
+
+		Parameters
+		----------
+		content: String
+			Content of the message to be sent. It can be text
+			or URL to images.
+		**data
+			Aditional data to be sent in the request.
+
+		Returns
+		-------
+		Dictionary
+			Response's data.
+
+		"""
+		if self._is_photo(content):
 			data["photo"] = content
 			return self.make_request("sendPhoto", "POST", data)
 
-		if utils.is_animation(content):
+		if self._is_animation(content):
 			data["animation"] = content
 			return self.make_request("sendAnimation", "POST", data)
 
@@ -74,6 +121,14 @@ class TelBot:
 
 
 	def get_unread_messages(self):
+		"""Fetches unread messages from all chats the bot is part of.
+
+		Returns
+		-------
+		List
+			A list of messages, each represented as a dictionary.
+
+		"""
 		updates = self.make_request("getUpdates", "GET")
 		if not updates:
 			return []
@@ -85,6 +140,18 @@ class TelBot:
 
 
 	def handle_message(self, text, user_name, chat_id):
+		"""Process a message and executes command if found.
+
+		Parameters
+		----------
+		text: String
+			Message's text.
+		user_name: String
+			Sender's user name.
+		chat_id: String
+			ID of the chat the message was sent to.
+
+		"""
 		for command in self.commands:
 			result = command(text=text, user_name=user_name)
 
@@ -99,6 +166,9 @@ class TelBot:
 
 
 	def read_messages(self):
+		"""Reads all unread messages and updates
+		the bot's timestamp.
+		"""
 		for message in self.get_unread_messages():
 			text = message["text"]
 			user_name = message["from"]["first_name"]
@@ -108,5 +178,22 @@ class TelBot:
 
 
 	def run(self):
+		"""Runs the bot indefinetely.
+		"""
 		while True:
 			self.read_messages()
+
+
+	def _is_photo(self, content):
+		"""Checks if content is a photo.
+		"""
+		return len(content.split()) == 1 and any(map(
+			lambda e: content.endswith(f".{e}"),
+			["jpg", "png", "jpeg"]
+		))
+
+
+	def _is_animation(self, content):
+		"""Checks if content is an animation.
+		"""
+		return len(content.split()) == 1 and content.endswith(".gif")
