@@ -3,7 +3,7 @@ from telbot import TelBot
 from commands import *
 
 TOKEN = os.environ.get("TELEGRAM_API_TOKEN")
-print(TOKEN)
+
 if __name__ == "__main__":
 	bot = TelBot(TOKEN)
 	print(">> TelBot correctly initialized!")
