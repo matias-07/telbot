@@ -178,7 +178,7 @@ class TelBot:
 
 
 	def run(self):
-		"""Runs the bot indefinetely.
+		"""Runs the bot indefinitely.
 		"""
 		while True:
 			self.read_messages()
