@@ -4,8 +4,9 @@ from cache import Cache
 
 CACHE = Cache()
 
-def _error_message():
-    """Returns a generic error message.
+def error_message():
+    """
+    Returns a generic error message.
     """
     return random.choice([
         "Oops... An error has ocurred",
@@ -14,91 +15,78 @@ def _error_message():
     ])
 
 def say_hello(message):
-    """Returns a greeting.
+    """
+    Returns a greeting.
     """
     user_name = message.user_name
-
     return random.choice([
         f"Hi {user_name}!",
         f"Hey {user_name}, what's up?",
+        f"Long time no see {user_name}",
     ])
 
-
 def say_bye(message):
-    """Returns a goodbye.
+    """
+    Returns a goodbye.
     """
     user_name = message.user_name
-
-    return [
-        f"Bye {user_name}",
-        "Take care!"
-    ]
+    return random.choice([
+        f"Bye {user_name}!",
+        f"See you later {user_name}",
+        f"Take care {user_name}",
+    ])
 
 def xkcd(message):
-    """Returns a random xkcd comic [title, image].
     """
-    try:
-        response = requests.get(f"https://xkcd.com/{random.randint(1, 2316)}/info.0.json")
-        json_response = response.json()
-        return [
-            json_response.get("title"),
-            json_response.get("img")
-        ]
-    except:
-        return "Something went wrong..."
+    Returns a random xkcd comic [title, image].
+    """
+    comic_id = random.randint(1, 2316)
+    response = requests.get(f"https://xkcd.com/{comic_id}/info.0.json")
+    data = response.json()
+    return [data.get("title"), data.get("img")]
 
 def btc(message):
-    """Returns BTC conversion to given currency.
     """
-    query_currency = message.args[0].upper()
-
-    try:
-        response = requests.get("https://bitpay.com/api/rates")
-        json_response = response.json()
-        for currency in json_response:
-            if currency["code"] == query_currency:
-                return f"1 BTC = {currency['rate']} {query_currency}"
-    except:
-        return "Error"
-
-    return "I couldn't find the conversion to that currency"
+    Returns BTC conversion to given currency.
+    """
+    currency = message.args[0].upper()
+    response = requests.get("https://bitpay.com/api/rates")
+    data = response.json()
+    for _currency in data:
+        if _currency["code"] == currency:
+            return f"1 BTC = {_currency['rate']} {currency}"
 
 def newton(message):
+    """
+    Makes a math operation and returns the result.
+    Reference: https://github.com/aunyks/newton-api
+    """
     operation = message.args[0]
     expression = message.args[1]
-
-    try:
-        response = requests.get(f"https://newton.now.sh/{operation}/{expression}")
-        json_response = response.json()
-        return f"The result is {json_response['result']}"
-    except:
-        return _error_message()
+    response = requests.get(f"https://newton.now.sh/{operation}/{expression}")
+    data = response.json()
+    return f"The result is {data['result']}"
 
 def reddit(message):
-    """Returns a top reddit post [message, url].
     """
-    try:
-        json_response = CACHE.get("reddit")
-
-        if not json_response:
-            response = requests.get(
-                "https://www.reddit.com/.json",
-                headers={"User-agent": "TelBot 0.1"}
-            )
-            json_response = response.json()
-            # Cache for 1 hour
-            CACHE.set("reddit", json_response, 60 * 60)
-
-        posts = json_response["data"]["children"]
-        post = random.choice(posts)
-        return f"https://www.reddit.com/{post['data']['permalink']}"
-    except:
-        return _error_message()
+    Returns a top reddit post [message, url].
+    """
+    data = CACHE.get("reddit")
+    if not data:
+        response = requests.get(
+            "https://www.reddit.com/.json",
+            headers={"User-agent": "TelBot 0.1"}
+        )
+        data = response.json()
+        CACHE.set("reddit", data, 60 * 60)
+    posts = data["data"]["children"]
+    post = random.choice(posts)
+    return f"https://www.reddit.com/{post['data']['permalink']}"
 
 def yesno(message):
-    try:
-        response = requests.get(f"https://yesno.wtf/api")
-        json_response = response.json()
-        return json_response["image"]
-    except:
-        return _error_message()
+    """
+    Returns yes or no as a GIF.
+    """
+    response = requests.get(f"https://yesno.wtf/api")
+    json_response = response.json()
+    return json_response["image"]

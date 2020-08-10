@@ -9,6 +9,7 @@ if not TELEGRAM_API_TOKEN:
     sys.exit("Telegram API token not found")
 
 bot = TelBot(TELEGRAM_API_TOKEN)
+bot.on_error(cmd.error_message)
 bot.on_message_contains(["hello", "hi"], cmd.say_hello)
 bot.on_message_contains(["bye"], cmd.say_bye)
 bot.on_message_contains(["yes or no"], cmd.yesno)
