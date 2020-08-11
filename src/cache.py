@@ -1,6 +1,8 @@
 from datetime import datetime
 
 class Cache:
+    """Simple Cache implementation.
+    """
 
     def __init__(self):
         self.data = {}
@@ -26,3 +28,5 @@ class Cache:
 
     def remove(self, key):
         self.data[key] = {}
+
+cache = Cache()
