@@ -1,6 +1,6 @@
 import re
 from datetime import datetime
-from client import BotClient, Response
+from .client import BotClient, Response
 
 class TelBot:
     """Represents a Telegram bot.

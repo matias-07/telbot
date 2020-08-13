@@ -1,6 +1,6 @@
 import random
 import requests
-from cache import cache
+from telbot import cache
 
 def error_message():
     """Returns a generic error message.

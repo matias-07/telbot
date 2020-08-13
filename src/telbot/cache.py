@@ -28,5 +28,3 @@ class Cache:
 
     def remove(self, key):
         self.data[key] = {}
-
-cache = Cache()
