@@ -5,7 +5,7 @@ from datetime import datetime
 class Message:
     """Wrapper class for a Telegram Message Object.
     """
-    
+
     def __init__(self, message_dict):
         """Constructor of the Message class.
         Parameters:
@@ -16,30 +16,30 @@ class Message:
         self.user_name = message_dict["from"]["first_name"]
         self.timestamp = int(message_dict["date"])
         self.args = []
-    
+
     def __getitem__(self, index):
         """Returns the word in the message content
         in the given index.
         """
         return self.content.split()[index]
-    
+
     def __contains__(self, text):
         """Returns a boolean indicating if the given text
         (normalized) is present in the message content.
         """
         return self._normalize(text) in self._normalize(self.content)
-    
+
     def __len__(self):
         """Returns the length of the message content.
         """
         return len(self.content)
-    
+
     def split(self):
         """Splits the message content (normalized) in
         words and returns the resulting list.
         """
         return self._normalize(self.content).split()
-    
+
     def _normalize(self, text):
         """Returns the normalized version of the given text
         (lowercase, no diacritics).
@@ -82,9 +82,9 @@ class Response:
         for extension in [".jpg", ".png", ".jpeg"]:
             if self.content.endswith(extension):
                 return True
-        
+
         return False
-    
+
     def is_animation(self):
         """Returns a boolean indicating if the response
         is an animation.
@@ -154,7 +154,7 @@ class BotClient:
         if len(messages) > 0:
             self.timestamp = messages[-1].timestamp
         return messages
-    
+
     def get_me(self):
         """Returns information about the bot user.
         """
