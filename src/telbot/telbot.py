@@ -1,14 +1,14 @@
 import re
-from datetime import datetime
-from .client import BotClient, Response
+from .client import BotClient
+from .client import Response
+from .client import TelegramBotAPIException
 
 class TelBot:
     """Represents a Telegram bot.
     """
 
     def __init__(self, api_token):
-        """
-        Constructor of the TelBot class.
+        """Constructor of the TelBot class.
         Parameters:
         api_token -- A Telegram BOT API token
         """
@@ -77,31 +77,28 @@ class TelBot:
         Parameters:
         message -- A Message object.
         """
+        results = []
         for command in self.commands:
-            results = None
             try:
                 results = command(message)
             except:
                 results = self.error_response()
-            if not results:
-                continue
-            if isinstance(results, str):
-                results = [results]
-            return results
-        return []
-
-    def handle_inbox(self):
-        """Reads the received messages and sends
-        the responses.
-        """
-        for message in self.client.fetch_messages():
-            results = self.handle_message(message)
-            for result in results:
-                response = Response(result, message.chat_id)
-                self.client.send_response(response)
+            if results:
+                if isinstance(results, str):
+                    results = [results]
+                break
+        return [Response(res, message.chat_id) for res in results]
 
     def run(self):
-        """Starts the bot.
+        """Runs the bot and yields the incoming messages
+        and sent responses.
         """
         while True:
-            self.handle_inbox()
+            try:
+                for message in self.client.fetch_messages():
+                    yield message
+                    for response in self.handle_message(message):
+                        self.client.send_response(response)
+                        yield response
+            except TelegramBotAPIException as e:
+                yield e

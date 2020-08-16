@@ -2,6 +2,8 @@ import time
 import requests
 from datetime import datetime
 
+class TelegramBotAPIException(Exception): pass
+
 class Message:
     """Wrapper class for a Telegram Message Object.
     """
@@ -13,7 +15,9 @@ class Message:
         """
         self.content = message_dict["text"]
         self.chat_id = message_dict["chat"]["id"]
-        self.user_name = message_dict["from"]["first_name"]
+        self.user_first_name = message_dict["from"]["first_name"]
+        self.user_name = message_dict["from"]["username"]
+        self.user_id = message_dict["from"]["id"]
         self.timestamp = int(message_dict["date"])
         self.args = []
 
@@ -59,6 +63,9 @@ class Message:
                 normalized += character
         return normalized
 
+    def __str__(self):
+        return f"[Message] content: \"{self.content}\" from: \"{self.chat_id}\""
+
 class Response:
     """Represents a response message.
     """
@@ -91,6 +98,9 @@ class Response:
         """
         return len(self.content.split()) == 1 and self.content.endswith(".gif")
 
+    def __str__(self):
+        return f"[Response] content: \"{self.content}\" to: \"{self.to}\""
+
 class BotClient:
     """Wrapper for the Telegram Bot API.
     """
@@ -102,6 +112,8 @@ class BotClient:
         Parameters:
         token -- Valid Telegram Bot API token
         """
+        if not token:
+            raise TelegramBotAPIException("No token provided")
         self.api_url = "https://api.telegram.org/bot" + token
         self.timestamp = datetime.now().timestamp()
 
@@ -123,7 +135,7 @@ class BotClient:
         time.sleep(self.SLEEP_TIME)
         json_response = response.json()
         if not json_response["ok"]:
-            return None
+            raise TelegramBotAPIException(json_response)
         return json_response["result"]
 
     def send_response(self, response):
