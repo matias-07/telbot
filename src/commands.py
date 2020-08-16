@@ -14,21 +14,21 @@ def error_message():
 def say_hello(message):
     """Returns a greeting.
     """
-    user_name = message.user_name
+    user_first_name = message.user_first_name
     return random.choice([
-        f"Hi {user_name}!",
-        f"Hey {user_name}, what's up?",
-        f"Long time no see {user_name}",
+        f"Hi {user_first_name}!",
+        f"Hey {user_first_name}, what's up?",
+        f"Long time no see {user_first_name}",
     ])
 
 def say_bye(message):
     """Returns a goodbye.
     """
-    user_name = message.user_name
+    user_first_name = message.user_first_name
     return random.choice([
-        f"Bye {user_name}!",
-        f"See you later {user_name}",
-        f"Take care {user_name}",
+        f"Bye {user_first_name}!",
+        f"See you later {user_first_name}",
+        f"Take care {user_first_name}",
     ])
 
 def xkcd(message):
@@ -36,6 +36,7 @@ def xkcd(message):
     """
     comic_id = random.randint(1, 2316)
     response = requests.get(f"https://xkcd.com/{comic_id}/info.0.json")
+    response.raise_for_status()
     data = response.json()
     return [data.get("title"), data.get("img")]
 
@@ -44,6 +45,7 @@ def btc(message):
     """
     currency = message.args[0].upper()
     response = requests.get("https://bitpay.com/api/rates")
+    response.raise_for_status()
     data = response.json()
     for _currency in data:
         if _currency["code"] == currency:
@@ -56,6 +58,7 @@ def newton(message):
     operation = message.args[0]
     expression = message.args[1]
     response = requests.get(f"https://newton.now.sh/{operation}/{expression}")
+    response.raise_for_status()
     data = response.json()
     return f"The result is {data['result']}"
 
@@ -68,6 +71,7 @@ def reddit(message):
             "https://www.reddit.com/.json",
             headers={"User-agent": "TelBot 0.1"}
         )
+        response.raise_for_status()
         data = response.json()
         cache.set("reddit", data, 60 * 60)
     posts = data["data"]["children"]
@@ -78,5 +82,6 @@ def yesno(message):
     """Returns yes or no as a GIF.
     """
     response = requests.get(f"https://yesno.wtf/api")
+    response.raise_for_status()
     json_response = response.json()
     return json_response["image"]
