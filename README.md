@@ -46,5 +46,5 @@ def newton(message):
     data = response.json()
     return f"The result is {data['result']}"
 
-bot.on_message_matches(r"newton (\w+) (.+)", newton)
+bot.on_message_matches([r"newton (\w+) (.+)"], newton)
 ```
