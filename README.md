@@ -7,7 +7,7 @@ Telegram chat bot built using the Telegram Bot API.
 - Get a [Telegram Bot API](https://core.telegram.org/bots/api) token.
 - Set your token as a environment variable: `export TELEGRAM_API_TOKEN={your_token}`.
 - Clone this repository.
-- Inside the repository's folder execute: `python3 -m venv .` and then `source bin/activate`.
+- Inside the repository folder execute: `python3 -m venv .` and then `source bin/activate`.
 - Install the requirements: `pip install -r requirements.txt`.
 
 ## Usage
