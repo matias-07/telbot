@@ -33,7 +33,7 @@ def hello(message):
     name = message.user_first_name
     return f"Hello {name}!"
 
-bot.on_message_equals(["xkcd"], xkcd)
+bot.on_message_equals(["hi", "hello"], hello)
 ```
 
 - Make a calculation and return the result, using the [newton API](https://github.com/aunyks/newton-api). When using regular expressions, the capture groups are used as arguments of the message (`message.args`).
